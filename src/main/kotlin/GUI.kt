@@ -8,19 +8,15 @@ import javax.swing.JPanel
 var game = gameWithGosperGliderGun
 
 fun main() {
-
-    var mainWindow: MainWindow? = null
-    EventQueue.invokeAndWait{
-        mainWindow = MainWindow()
-        mainWindow?.isVisible = true
+    val mainWindow = MainWindow()
+    EventQueue.invokeAndWait {
+        mainWindow.open()
     }
 
     while (true) {
         Thread.sleep(50)
         game = game.tick()
-        EventQueue.invokeAndWait {
-            mainWindow?.repaint()
-        }
+        EventQueue.invokeAndWait { mainWindow.repaint() }
     }
 }
 
@@ -28,34 +24,42 @@ class MainWindow() : JFrame() {
     var conwayCanvas: ConwayCanvas = ConwayCanvas()
 
     init {
-        setTitle("Conway's Game Of Life, suckaz")
+        setTitle("Conway's Game Of Life, fools")
         defaultCloseOperation = JFrame.EXIT_ON_CLOSE
 
         contentPane.add(conwayCanvas)
+    }
 
+    fun open() {
         pack()
         validate()
 
         setLocationRelativeTo(null)
+
+        isVisible = true
     }
 }
 
 class ConwayCanvas() : JPanel() {
+
+    private val cellColours = mapOf(
+        true to Color.BLACK,
+        false to Color.WHITE)
+
     override fun getPreferredSize(): Dimension {
         return Dimension(CELL_WIDTH * game.width, CELL_HEIGHT * game.height)
     }
 
-    override fun paintComponent(g: Graphics?) {
-        for (y in 0..game.height) {
-            for (x in 0..game.width) {
-                val cell = game.liveCellAt(x, y)
-                if (cell) {
-                    g?.color = Color.BLACK
-                } else {
-                    g?.color = Color.WHITE
-                }
-                g?.fillRect(x*CELL_WIDTH, y*CELL_HEIGHT, CELL_WIDTH-1, CELL_HEIGHT-1)
+    override fun paintComponent(g: Graphics) {
+        (0..game.height).forEach { y ->
+            (0..game.width).forEach { x ->
+                g.drawCell(x, y)
             }
         }
+    }
+
+    private fun Graphics.drawCell(x: Int, y: Int) {
+        this.color = cellColours[game.isCellAlive(x, y)]
+        this.fillRect(x * CELL_WIDTH, y * CELL_HEIGHT, CELL_WIDTH - 1, CELL_HEIGHT - 1)
     }
 }

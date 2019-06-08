@@ -84,12 +84,12 @@ val gameWithGosperGliderGun = gameOf(
 
 
 // Game shizzle here
-data class Game(val cells: Set<Cell>, val width: Int, val height: Int) {
+class Game(val cells: Set<Cell>, val width: Int, val height: Int) {
     fun tick(): Game {
         val cellsPlusNeighbours = cells.union(cells.flatMap { it.neighbours() })
         val cells = cellsPlusNeighbours.filter { it.isAliveInNextGeneration(this) }.toSet()
 
-        return this.copy(cells = cells)
+        return Game(cells = cells, width = this.width, height = this.height)
     }
 
     fun println() {
@@ -104,7 +104,7 @@ data class Game(val cells: Set<Cell>, val width: Int, val height: Int) {
             }.joinToString("")
         }.joinToString("\n")
 
-    fun liveCellAt(x: Int, y: Int): Boolean {
+    fun isCellAlive(x: Int, y: Int): Boolean {
         return cells.contains(Cell(x, y))
     }
 }

@@ -22,7 +22,7 @@ class ConwayTest {
     @Test
     fun `empty board stays empty`() {
         assertThat(
-            makeBoard(
+            boardOf(
                 """
                     ....
                     ....
@@ -31,7 +31,7 @@ class ConwayTest {
                 """
             ).tick(),
             equalTo(
-                makeBoard(
+                boardOf(
                 """
                     ....
                     ....
@@ -46,7 +46,7 @@ class ConwayTest {
     @Test
     fun `lone cell dies`() {
         assertThat(
-            makeBoard(
+            boardOf(
                 """
                     ....
                     .x..
@@ -55,7 +55,7 @@ class ConwayTest {
                 """
             ).tick(),
             equalTo(
-                makeBoard(
+                boardOf(
                 """
                     ....
                     ....
@@ -70,7 +70,7 @@ class ConwayTest {
     @Test
     fun `block stays the same`() {
         assertThat(
-            makeBoard(
+            boardOf(
             """
                 ....
                 .xx.
@@ -79,7 +79,7 @@ class ConwayTest {
             """
             ).tick(),
             equalTo(
-                makeBoard(
+                boardOf(
                 """
                     ....
                     .xx.
@@ -91,19 +91,43 @@ class ConwayTest {
         )
     }
 
+//    @Test
+//    fun `tub stays the same`() {
+//        assertThat(
+//            boardOf(
+//                """
+//                .....
+//                ..x..
+//                .x.x.
+//                ..x..
+//                .....
+//            """
+//            ).tick(),
+//            equalTo(
+//                boardOf(
+//                    """
+//                .....
+//                ..x..
+//                .x.x.
+//                ..x..
+//                .....
+//            """
+//                )
+//            )
+//        )
+//    }
 
-    private fun makeBoard(boardString: String): Game {
+    private fun boardOf(boardString: String): Game {
         val split = boardString.trimIndent().split("\n")
         println(split)
 
         val cells = split.mapIndexed { y, line ->
             line.mapIndexed { x, cellChar ->
-                if (cellChar == 'x') Cell(true, x, y)
-                else Cell(false, x, y)
-            }
+                if (cellChar == 'x') Cell(x, y)
+                else null
+            }.filterNotNull()
         }
             .flatMap { it }
-            .filter { it.alive }
             .toSet()
         println("cells is $cells")
 
@@ -113,14 +137,24 @@ class ConwayTest {
 
 data class Game(val cells: Set<Cell>) {
     fun tick(): Game {
-        if (cells.size == 0)
-            return this
-        else if (cells.size == 4)
-            return this
-        else
-            return Game(emptySet())
+        val cellsWith3Neighbours = cells.filter { it.numNeighbours(this) == 3 }.toSet()
+        return Game(cellsWith3Neighbours)
     }
 }
 
-data class Cell(val alive: Boolean, val x: Int, val y: Int)
+data class Cell(val x: Int, val y: Int) {
+    fun neighbours(): Set<Cell> {
+        val thingie = (-1..1).flatMap { dx ->
+            (-1..1).map { dy ->
+                Cell(x + dx, y + dy)
+            }
+        }
+            .filter { it != this }
+            .toSet()
+        println("thingie: $thingie")
 
+        return thingie
+    }
+
+    fun numNeighbours(game: Game): Int = neighbours().filter { game.cells.contains(it) }.size
+}

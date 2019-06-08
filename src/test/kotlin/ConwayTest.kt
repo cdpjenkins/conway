@@ -2,21 +2,6 @@ import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import org.junit.jupiter.api.Test
 
-
-// The rules
-// live cell:
-// 0, 1 live neighbours --> gonna die due to loneliness
-// 2, 3 neighbours ---> gonna survive
-// 4, 5, 6, 7, 8 neighbours ----> gonna die due to overcrowding
-//
-
-// dead cell:
-// 3 neighbours ---> come to life
-// else ----> meh, stay dead
-
-//    XX
-//    XX
-
 class ConwayTest {
 
     @Test
@@ -117,32 +102,31 @@ class ConwayTest {
         )
     }
 
-//    @Test
-//    fun `blinker blinks`() {
-//        assertThat(
-//            boardOf(
-//                """
-//                .....
-//                .....
-//                .xxx.
-//                .....
-//                .....
-//            """
-//            ).tick(),
-//            equalTo(
-//                boardOf(
-//                    """
-//                .....
-//                ..x..
-//                ..x..
-//                ..x..
-//                .....
-//            """
-//                )
-//            )
-//        )
-//    }
-
+    @Test
+    fun `blinker blinks`() {
+        assertThat(
+            boardOf(
+                """
+                .....
+                .....
+                .xxx.
+                .....
+                .....
+            """
+            ).tick(),
+            equalTo(
+                boardOf(
+                    """
+                .....
+                ..x..
+                ..x..
+                ..x..
+                .....
+            """
+                )
+            )
+        )
+    }
 
     private fun boardOf(boardString: String): Game {
         val split = boardString.trimIndent().split("\n")
@@ -162,14 +146,16 @@ class ConwayTest {
 
 data class Game(val cells: Set<Cell>) {
     fun tick(): Game {
-        val cellsWith3Neighbours = cells.filter { it.gonnaLive(this) }.toSet()
-        return Game(cellsWith3Neighbours)
+        val cellsPlusNeighbours = cells.union(cells.flatMap { it.neighbours() })
+        val filter = cellsPlusNeighbours.filter { it.gonnaLive(this) }.toSet()
+
+        return Game(filter)
     }
 }
 
 data class Cell(val x: Int, val y: Int) {
     fun neighbours(): Set<Cell> {
-        val thingie = (-1..1).flatMap { dx ->
+        val neighbours = (-1..1).flatMap { dx ->
             (-1..1).map { dy ->
                 Cell(x + dx, y + dy)
             }
@@ -177,10 +163,12 @@ data class Cell(val x: Int, val y: Int) {
             .filter { it != this }
             .toSet()
 
-        return thingie
+        return neighbours
     }
 
-    fun numNeighbours(game: Game): Int = neighbours().filter { game.cells.contains(it) }.size
+    fun numLiveNeighbours(game: Game): Int = neighbours().filter { game.cells.contains(it) }.size
 
-    fun gonnaLive(game: Game): Boolean = numNeighbours(game) in (2..3)
+    fun gonnaLive(game: Game): Boolean =
+        if (this in game.cells) numLiveNeighbours(game) in (2..3)
+        else numLiveNeighbours(game) == 3
 }

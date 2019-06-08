@@ -1,5 +1,6 @@
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class ConwayTest {
@@ -103,11 +104,6 @@ class ConwayTest {
     }
 
     private fun Game.assert(expected: String) {
-        assertThat(
-            this.toPrettyString(),
-            equalTo(
-                expected.trimIndent()
-            )
-        )
+        assertEquals(expected.trimIndent(), this.toPrettyString())
     }
 }

@@ -5,10 +5,11 @@ import java.awt.Graphics
 import javax.swing.JFrame
 import javax.swing.JPanel
 
-var game = gameWithGosperGliderGun
 
 fun main() {
-    val mainWindow = MainWindow()
+    var game = gameWithGosperGliderGun
+
+    val mainWindow = MainWindow(game)
     EventQueue.invokeAndWait {
         mainWindow.open()
     }
@@ -16,12 +17,13 @@ fun main() {
     while (true) {
         Thread.sleep(50)
         game = game.tick()
-        EventQueue.invokeAndWait { mainWindow.repaint() }
+        mainWindow.hereIsTheGameFool(game)
     }
 }
 
-class MainWindow() : JFrame() {
-    var conwayCanvas: ConwayCanvas = ConwayCanvas()
+
+class MainWindow(game: Game) : JFrame() {
+    var conwayCanvas: ConwayCanvas = ConwayCanvas(game)
 
     init {
         setTitle("Conway's Game Of Life, fools")
@@ -38,9 +40,15 @@ class MainWindow() : JFrame() {
 
         isVisible = true
     }
+
+    fun hereIsTheGameFool(game: Game) {
+        conwayCanvas.hereIsTheGameSuckaz(game)
+        EventQueue.invokeAndWait { this.repaint() }
+    }
+
 }
 
-class ConwayCanvas() : JPanel() {
+class ConwayCanvas(var game: Game) : JPanel() {
 
     private val cellColours = mapOf(
         true to Color.BLACK,
@@ -61,5 +69,9 @@ class ConwayCanvas() : JPanel() {
     private fun Graphics.drawCell(x: Int, y: Int) {
         this.color = cellColours[game.isCellAlive(x, y)]
         this.fillRect(x * CELL_WIDTH, y * CELL_HEIGHT, CELL_WIDTH - 1, CELL_HEIGHT - 1)
+    }
+
+    fun hereIsTheGameSuckaz(game: Game) {
+        this.game = game
     }
 }

@@ -7,27 +7,25 @@ import javax.swing.JPanel
 
 
 fun main() {
-    var game = gameWithGosperGliderGun
-
-    val mainWindow = MainWindow(game)
+    val mainWindow = MainWindow(gameWithGosperGliderGun)
     EventQueue.invokeAndWait {
         mainWindow.open()
     }
 
     while (true) {
         Thread.sleep(50)
-        game = game.tick()
-        mainWindow.hereIsTheGameFool(game)
+        mainWindow.updateGame(mainWindow.game.tick())
     }
 }
 
-
 class MainWindow(game: Game) : JFrame() {
+    val game get() = conwayCanvas.game
+
     var conwayCanvas: ConwayCanvas = ConwayCanvas(game)
 
     init {
         setTitle("Conway's Game Of Life, fools")
-        defaultCloseOperation = JFrame.EXIT_ON_CLOSE
+        defaultCloseOperation = EXIT_ON_CLOSE
 
         contentPane.add(conwayCanvas)
     }
@@ -41,11 +39,10 @@ class MainWindow(game: Game) : JFrame() {
         isVisible = true
     }
 
-    fun hereIsTheGameFool(game: Game) {
-        conwayCanvas.hereIsTheGameSuckaz(game)
+    fun updateGame(game: Game) {
+        conwayCanvas.updateGame(game)
         EventQueue.invokeAndWait { this.repaint() }
     }
-
 }
 
 class ConwayCanvas(var game: Game) : JPanel() {
@@ -71,7 +68,7 @@ class ConwayCanvas(var game: Game) : JPanel() {
         this.fillRect(x * CELL_WIDTH, y * CELL_HEIGHT, CELL_WIDTH - 1, CELL_HEIGHT - 1)
     }
 
-    fun hereIsTheGameSuckaz(game: Game) {
+    fun updateGame(game: Game) {
         this.game = game
     }
 }

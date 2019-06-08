@@ -1,11 +1,3 @@
-import java.awt.Color
-import java.awt.Dimension
-import java.awt.EventQueue
-import java.awt.Graphics
-import javax.swing.JFrame
-import javax.swing.JPanel
-
-
 const val CELL_WIDTH = 5
 const val CELL_HEIGHT = 5
 
@@ -81,8 +73,6 @@ val gameWithGosperGliderGun = gameOf(
         """
 )
 
-
-
 // Game shizzle here
 class Game(val cells: Set<Cell>, val width: Int, val height: Int) {
     fun tick(): Game {
@@ -132,20 +122,25 @@ data class Cell(val x: Int, val y: Int) {
 }
 
 fun gameOf(boardString: String): Game {
-    val split = boardString.trimIndent().split("\n")
+    val linesOfText = boardString.trimIndent().split("\n")
 
-    val height = split.size
-    val width = split[0].length
+    val height = linesOfText.size
+    val width = linesOfText[0].length
 
-    val cells = split.mapIndexed { y, line ->
-        line.mapIndexed { x, cellChar ->
-            if (cellChar == 'x') Cell(x, y)
-            else null
-        }.filterNotNull()
-    }
-        .flatMap { it }
-        .toSet()
+    val cells = linesOfText.liveCells()
 
     return Game(cells, width, height)
 }
 
+private fun List<String>.liveCells(): Set<Cell> {
+    return mapIndexed { y, line -> line.liveCells(y) }
+        .flatten()
+        .toSet()
+}
+
+private fun String.liveCells(y: Int): List<Cell> {
+    return this.mapIndexed { x, cellChar ->
+        if (cellChar == 'x') Cell(x, y)
+        else null
+    }.filterNotNull()
+}

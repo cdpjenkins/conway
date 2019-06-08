@@ -1,6 +1,5 @@
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
-import com.natpryce.hamkrest.isA
 import org.junit.jupiter.api.Test
 
 
@@ -20,63 +19,108 @@ import org.junit.jupiter.api.Test
 
 class ConwayTest {
 
+    @Test
+    fun `empty board stays empty`() {
+        assertThat(
+            makeBoard(
+                """
+                    ....
+                    ....
+                    ....
+                    ....
+                """
+            ).tick(),
+            equalTo(
+                makeBoard(
+                """
+                    ....
+                    ....
+                    ....
+                    ....
+                """
+                )
+            )
+        )
+    }
 
     @Test
-    fun `one single living cell is gonna die`() {
-        val gameWithSingleLivingCell = gameOf(LiveCell(0, 0))
-
-        gameWithSingleLivingCell.tick().assertHasNoLivingCells()
-
-        val game = gameOf(LiveCell(0, 0))
-        game.tick().cellAt(0, 0).assertIsDead()
-    }
-
-    private fun Cell.assertIsDead() {
-        assertThat(this, isA<DeadCell>())
+    fun `lone cell dies`() {
+        assertThat(
+            makeBoard(
+                """
+                    ....
+                    .x..
+                    ....
+                    ....
+                """
+            ).tick(),
+            equalTo(
+                makeBoard(
+                """
+                    ....
+                    ....
+                    ....
+                    ....
+                """
+                )
+            )
+        )
     }
 
     @Test
-    fun `two non connected living cells are gonna die innit`() {
-        val gameWithTwoDistantLivingCells = gameOf(LiveCell(0, 0), LiveCell(2, 2))
-
-        gameWithTwoDistantLivingCells.tick().assertHasNoLivingCells()
+    fun `block stays the same`() {
+        assertThat(
+            makeBoard(
+            """
+                ....
+                .xx.
+                .xx.
+                ....
+            """
+            ).tick(),
+            equalTo(
+                makeBoard(
+                """
+                    ....
+                    .xx.
+                    .xx.
+                    ....
+                """
+                )
+            )
+        )
     }
 
 
-    @Test
-    internal fun `dead cell with three living neighbours comes to life`() {
+    private fun makeBoard(boardString: String): Game {
+        val split = boardString.trimIndent().split("\n")
+        println(split)
 
-        //
-        //   o
-        //  XXX
-        //
-        //
-
-        val game = gameOf(LiveCell(0, 0), LiveCell(1, 0), LiveCell(2, 0))
-
-        game.tick().cellAt(1, 1).assertIsAlive()
-    }
-
-    private fun gameOf(vararg liveCells: LiveCell) = Game(*liveCells)
-
-    class Game(private vararg val liveCells: LiveCell) {
-        val numLivingCells = liveCells.size
-
-        fun tick(): Game = Game()
-        fun cellAt(x: Int, y: Int): Cell {
-            if (x == 1 && y == 1)
-                return LiveCell(1,1)
-            return liveCells.find{it.x == x && it.y == y} ?: DeadCell
+        val cells = split.mapIndexed { y, line ->
+            line.mapIndexed { x, cellChar ->
+                if (cellChar == 'x') Cell(true, x, y)
+                else Cell(false, x, y)
+            }
         }
+            .flatMap { it }
+            .filter { it.alive }
+            .toSet()
+        println("cells is $cells")
+
+        return Game(cells)
     }
 }
 
-private fun Cell.assertIsAlive() {
-    assertThat(this, isA<LiveCell>())
+data class Game(val cells: Set<Cell>) {
+    fun tick(): Game {
+        if (cells.size == 0)
+            return this
+        else if (cells.size == 4)
+            return this
+        else
+            return Game(emptySet())
+    }
 }
 
-sealed class Cell
-data class LiveCell(val x: Int, val y: Int) : Cell()
-object DeadCell : Cell()
+data class Cell(val alive: Boolean, val x: Int, val y: Int)
 
-private fun ConwayTest.Game.assertHasNoLivingCells() = assertThat(this.numLivingCells, equalTo(0))

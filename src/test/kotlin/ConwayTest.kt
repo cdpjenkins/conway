@@ -3,127 +3,110 @@ import com.natpryce.hamkrest.equalTo
 import org.junit.jupiter.api.Test
 
 class ConwayTest {
-
     @Test
     fun `empty board stays empty`() {
-        assertThat(
-            gameOf(
-                """
-                    ....
-                    ....
-                    ....
-                    ....
-                """
-            ).tick(),
-            equalTo(
-                gameOf(
-                """
-                    ....
-                    ....
-                    ....
-                    ....
-                """
-                )
-            )
+        gameOf(
+            """
+                ....
+                ....
+                ....
+                ....
+            """
+        ).tick().assert(
+            """
+                ....
+                ....
+                ....
+                ....
+            """
         )
     }
 
     @Test
     fun `lone cell dies`() {
-        assertThat(
-            gameOf(
-                """
-                    ....
-                    .x..
-                    ....
-                    ....
-                """
-            ).tick(),
-            equalTo(
-                gameOf(
-                """
-                    ....
-                    ....
-                    ....
-                    ....
-                """
-                )
-            )
+        gameOf(
+            """
+                ....
+                .x..
+                ....
+                ....
+            """
+        ).tick().assert(
+            """
+                ....
+                ....
+                ....
+                ....
+            """
         )
     }
 
     @Test
     fun `block stays the same`() {
-        assertThat(
-            gameOf(
+        gameOf(
             """
                 ....
                 .xx.
                 .xx.
                 ....
             """
-            ).tick(),
-            equalTo(
-                gameOf(
-                """
-                    ....
-                    .xx.
-                    .xx.
-                    ....
-                """
-                )
-            )
+        ).tick().assert(
+            """
+                ....
+                .xx.
+                .xx.
+                ....
+            """
         )
     }
 
     @Test
     fun `tub stays the same`() {
-        assertThat(
-            gameOf(
-                """
+        gameOf(
+            """
                 .....
                 ..x..
                 .x.x.
                 ..x..
                 .....
             """
-            ).tick(),
-            equalTo(
-                gameOf(
-                    """
+        ).tick().assert(
+            """
                 .....
                 ..x..
                 .x.x.
                 ..x..
                 .....
             """
-                )
-            )
         )
     }
 
     @Test
     fun `blinker blinks`() {
-        assertThat(
-            gameOf(
-                """
+        gameOf(
+            """
                 .....
                 .....
                 .xxx.
                 .....
                 .....
             """
-            ).tick(),
-            equalTo(
-                gameOf(
-                    """
+        ).tick().assert(
+            """
                 .....
                 ..x..
                 ..x..
                 ..x..
                 .....
             """
-                )
+        )
+    }
+
+    private fun Game.assert(expected: String) {
+        assertThat(
+            this,
+            equalTo(
+                gameOf(expected)
             )
         )
     }

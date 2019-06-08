@@ -104,9 +104,9 @@ class ConwayTest {
 
     private fun Game.assert(expected: String) {
         assertThat(
-            this,
+            this.toPrettyString(),
             equalTo(
-                gameOf(expected)
+                expected.trimIndent()
             )
         )
     }

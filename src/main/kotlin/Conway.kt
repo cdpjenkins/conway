@@ -4,46 +4,56 @@
 fun main() {
     var board = gameOf(
         """
-        ..x......
-        ...x.....
-        .xxx.....
-        .........
-        .........
-        .........
-        .........
-        .........
-        .........
+        ..x.................
+        ...x................
+        .xxx................
+        ....................
+        ....................
+        ....................
+        ....................
+        ....................
+        ....................
+        ....................
+        ....................
+        ....................
+        ....................
+        ....................
+        ....................
+        ....................
+        ....................
+        ....................
+        ....................
+        ....................
         """
     )
 
     while (true) {
-        board.printMeDo()
+        board.println()
         println()
-        Thread.sleep(500);
+        Thread.sleep(500)
         board = board.tick()
     }
 }
 
-data class Game(val cells: Set<Cell>) {
+data class Game(val cells: Set<Cell>, val width: Int, val height: Int) {
     fun tick(): Game {
         val cellsPlusNeighbours = cells.union(cells.flatMap { it.neighbours() })
-        val filter = cellsPlusNeighbours.filter { it.isAliveInNextGeneration(this) }.toSet()
+        val cells = cellsPlusNeighbours.filter { it.isAliveInNextGeneration(this) }.toSet()
 
-        return Game(filter)
+        return this.copy(cells = cells)
     }
 
-    fun printMeDo() {
-        for (y in 0..20) {
-            for (x in 0..20) {
-                if (Cell(x, y) in cells) {
-                    print("x")
-                } else {
-                    print(".")
-                }
-            }
-            println()
-        }
+    fun println() {
+        println(toPrettyString())
     }
+
+    fun toPrettyString(): String =
+        (0..height-1).map { y ->
+            (0..width-1).map { x ->
+                if (cells.contains(Cell(x, y))) 'x'
+                else '.'
+            }.joinToString("")
+        }.joinToString("\n")
 }
 
 data class Cell(val x: Int, val y: Int) {
@@ -62,12 +72,17 @@ data class Cell(val x: Int, val y: Int) {
     fun numLiveNeighbours(game: Game): Int = neighbours().filter { game.cells.contains(it) }.size
 
     fun isAliveInNextGeneration(game: Game): Boolean =
-        if (this in game.cells) numLiveNeighbours(game) in (2..3)
+        if (isAlive(game)) numLiveNeighbours(game) in (2..3)
         else numLiveNeighbours(game) == 3
+
+    private fun isAlive(game: Game) = this in game.cells
 }
 
 fun gameOf(boardString: String): Game {
     val split = boardString.trimIndent().split("\n")
+
+    val height = split.size
+    val width = split[0].length
 
     val cells = split.mapIndexed { y, line ->
         line.mapIndexed { x, cellChar ->
@@ -78,5 +93,5 @@ fun gameOf(boardString: String): Game {
         .flatMap { it }
         .toSet()
 
-    return Game(cells)
+    return Game(cells, width, height)
 }

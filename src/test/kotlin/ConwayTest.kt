@@ -91,15 +91,41 @@ class ConwayTest {
         )
     }
 
+    @Test
+    fun `tub stays the same`() {
+        assertThat(
+            boardOf(
+                """
+                .....
+                ..x..
+                .x.x.
+                ..x..
+                .....
+            """
+            ).tick(),
+            equalTo(
+                boardOf(
+                    """
+                .....
+                ..x..
+                .x.x.
+                ..x..
+                .....
+            """
+                )
+            )
+        )
+    }
+
 //    @Test
-//    fun `tub stays the same`() {
+//    fun `blinker blinks`() {
 //        assertThat(
 //            boardOf(
 //                """
 //                .....
-//                ..x..
-//                .x.x.
-//                ..x..
+//                .....
+//                .xxx.
+//                .....
 //                .....
 //            """
 //            ).tick(),
@@ -108,7 +134,7 @@ class ConwayTest {
 //                    """
 //                .....
 //                ..x..
-//                .x.x.
+//                ..x..
 //                ..x..
 //                .....
 //            """
@@ -117,9 +143,9 @@ class ConwayTest {
 //        )
 //    }
 
+
     private fun boardOf(boardString: String): Game {
         val split = boardString.trimIndent().split("\n")
-        println(split)
 
         val cells = split.mapIndexed { y, line ->
             line.mapIndexed { x, cellChar ->
@@ -129,7 +155,6 @@ class ConwayTest {
         }
             .flatMap { it }
             .toSet()
-        println("cells is $cells")
 
         return Game(cells)
     }
@@ -137,7 +162,7 @@ class ConwayTest {
 
 data class Game(val cells: Set<Cell>) {
     fun tick(): Game {
-        val cellsWith3Neighbours = cells.filter { it.numNeighbours(this) == 3 }.toSet()
+        val cellsWith3Neighbours = cells.filter { it.gonnaLive(this) }.toSet()
         return Game(cellsWith3Neighbours)
     }
 }
@@ -151,10 +176,11 @@ data class Cell(val x: Int, val y: Int) {
         }
             .filter { it != this }
             .toSet()
-        println("thingie: $thingie")
 
         return thingie
     }
 
     fun numNeighbours(game: Game): Int = neighbours().filter { game.cells.contains(it) }.size
+
+    fun gonnaLive(game: Game): Boolean = numNeighbours(game) in (2..3)
 }

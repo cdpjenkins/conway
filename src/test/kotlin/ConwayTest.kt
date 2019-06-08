@@ -1,38 +1,36 @@
-import com.natpryce.hamkrest.assertion.assertThat
-import com.natpryce.hamkrest.equalTo
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class ConwayTest {
     @Test
     fun `empty board stays empty`() {
-        gameOf(
+        givenAGameStartingAt(
             """
                 ....
                 ....
                 ....
                 ....
             """
-        ).tick().assert(
+        ).thenTheNextStateIs(
             """
                 ....
                 ....
                 ....
                 ....
-            """
+             """
         )
     }
 
     @Test
     fun `lone cell dies`() {
-        gameOf(
+        givenAGameStartingAt(
             """
                 ....
                 .x..
                 ....
                 ....
             """
-        ).tick().assert(
+        ).thenTheNextStateIs(
             """
                 ....
                 ....
@@ -44,14 +42,14 @@ class ConwayTest {
 
     @Test
     fun `block stays the same`() {
-        gameOf(
+        givenAGameStartingAt(
             """
                 ....
                 .xx.
                 .xx.
                 ....
             """
-        ).tick().assert(
+        ).thenTheNextStateIs(
             """
                 ....
                 .xx.
@@ -63,7 +61,7 @@ class ConwayTest {
 
     @Test
     fun `tub stays the same`() {
-        gameOf(
+        givenAGameStartingAt(
             """
                 .....
                 ..x..
@@ -71,7 +69,7 @@ class ConwayTest {
                 ..x..
                 .....
             """
-        ).tick().assert(
+        ).thenTheNextStateIs(
             """
                 .....
                 ..x..
@@ -84,7 +82,7 @@ class ConwayTest {
 
     @Test
     fun `blinker blinks`() {
-        gameOf(
+        givenAGameStartingAt(
             """
                 .....
                 .....
@@ -92,7 +90,7 @@ class ConwayTest {
                 .....
                 .....
             """
-        ).tick().assert(
+        ).thenTheNextStateIs(
             """
                 .....
                 ..x..
@@ -100,6 +98,16 @@ class ConwayTest {
                 ..x..
                 .....
             """
+        )
+    }
+
+    private fun Game.thenTheNextStateIs(nextStateInnit: String) {
+        this.tick().assert(nextStateInnit)
+    }
+
+    private fun givenAGameStartingAt(startingAt: String): Game {
+        return gameOf(
+            startingAt
         )
     }
 

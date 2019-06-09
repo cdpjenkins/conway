@@ -1,3 +1,5 @@
+import com.cdpjenkins.conway.Game
+import com.cdpjenkins.conway.gameOf
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -105,11 +107,7 @@ class ConwayTest {
         this.tick().assert(nextStateInnit)
     }
 
-    private fun givenAGameStartingAt(startingAt: String): Game {
-        return gameOf(
-            startingAt
-        )
-    }
+    private fun givenAGameStartingAt(startingAt: String): Game = gameOf(startingAt)
 
     private fun Game.assert(expected: String) {
         assertEquals(expected.trimIndent(), this.toPrettyString())

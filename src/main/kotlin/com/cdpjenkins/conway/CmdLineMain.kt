@@ -1,3 +1,5 @@
+package com.cdpjenkins.conway
+
 fun main() {
     var board = gameWithGosperGliderGun
     while (true) {
